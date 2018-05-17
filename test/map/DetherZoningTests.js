@@ -2,7 +2,7 @@
 /* global artifacts, contract, web3, assert */
 /* eslint-disable max-len */
 
-const {expectThrow} = require('./utils');
+const {expectThrow} = require('../utils');
 const congo = require('./congo12.json');
 const DetherZoning = artifacts.require('DetherZoning.sol');
 const Countries = artifacts.require('Countries.sol');
