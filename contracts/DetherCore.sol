@@ -139,7 +139,7 @@ contract DetherCore is DetherSetup, ERC223ReceivingContract, SafeMath {
   /*
    * Instanciation
    */
-  function DetherCore() {
+  constructor() {
    ceoAddress = msg.sender;
   }
   function initContract (address _dth, address _bank) external onlyCEO {

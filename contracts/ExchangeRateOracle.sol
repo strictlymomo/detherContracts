@@ -23,7 +23,7 @@ contract ExchangeRateOracle is DSMath {
 
   Medianizer public mkrPriceFeed;
 
-  function ExchangeRateOracle(address mkrPriceFeed_) public {
+  constructor(address mkrPriceFeed_) public {
     mkrPriceFeed = Medianizer(mkrPriceFeed_);
   }
 
