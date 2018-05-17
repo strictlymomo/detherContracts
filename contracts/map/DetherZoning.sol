@@ -8,10 +8,8 @@ import './Countries.sol';
 // library
 import './arachnid/strings.sol';
 
-contract DetherZoning is usingOraclize, Ownable  {
+contract DetherZoning is usingOraclize, Ownable, Countries  {
     using strings for *;
-
-    Countries public countryChecker ;
 
     struct Zone {
       address zoneOwner;
@@ -28,10 +26,6 @@ contract DetherZoning is usingOraclize, Ownable  {
     mapping(uint => bool) public yIndex;
 
     mapping(address => uint) public loyaltyPoints;
-
-    constructor(address countryCheckerAddress) public {
-        countryChecker = Countries(countryCheckerAddress);
-    }
 
     function updateXindex(uint x) public onlyOwner() {
       xIndex[x] = true;
@@ -75,7 +69,7 @@ contract DetherZoning is usingOraclize, Ownable  {
       require(y18 < 262144);
       require( (xIndex[x18] == true &&  yIndex[y18] == true) == false);
       //TODO: check it is inside country
-      require(countryChecker.isInsideCountry(x18, y18, country));
+      require(isInsideCountry(x18, y18, country));
 
       Zone memory zone = Zone(msg.sender, x18, y18, country);
       zonesArray.push(zone);

@@ -50,5 +50,4 @@ contract Countries is Ownable {
      }
      return false;
   }
-
 }
