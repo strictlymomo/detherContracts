@@ -1,10 +1,11 @@
 pragma solidity 0.4.23;
 
+// contract
 import "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
 import "zeppelin-solidity/contracts/token/ERC20/MintableToken.sol";
 
+// interface
 import './tokenfoundry/ERC223BasicToken.sol';
-
 
 /**
   * @title Token for the Dether project.

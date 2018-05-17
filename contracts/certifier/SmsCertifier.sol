@@ -16,6 +16,7 @@
 
 pragma solidity ^0.4.21;
 
+// contract
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract SmsCertifier is Ownable {

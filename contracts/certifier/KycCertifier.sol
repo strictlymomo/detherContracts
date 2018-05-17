@@ -16,6 +16,7 @@
 
 pragma solidity 0.4.23;
 
+// contract
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract KycCertifier is Ownable {

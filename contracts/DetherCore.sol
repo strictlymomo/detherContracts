@@ -1,11 +1,16 @@
-pragma solidity ^0.4.21;
+pragma solidity 0.4.23;
 
+// contract
 import './DetherSetup.sol';
-import './dth/tokenfoundry/ERC223ReceivingContract.sol';
-import './zepellin/SafeMath.sol';
-import './dth/tokenfoundry/ERC223Basic.sol';
 import './DetherAccessControl.sol';
-import 'bytes/BytesLib.sol';
+
+// interface
+import './dth/tokenfoundry/ERC223ReceivingContract.sol';
+import './dth/tokenfoundry/ERC223Basic.sol';
+
+// library
+import 'bytes/BytesLib.sol'; // EthPM
+import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract ExchangeRateOracle {
   function getWeiPriceOneUsd() external view returns(uint256);
@@ -28,7 +33,7 @@ contract DetherBank {
   function transferOwnership(address newOwner) public;
 }
 
-contract DetherCore is DetherSetup, ERC223ReceivingContract, SafeMath {
+contract DetherCore is DetherSetup, ERC223ReceivingContract {
   using BytesLib for bytes;
 
   /**

@@ -1,8 +1,11 @@
 pragma solidity 0.4.23;
 
+// contract
 import './certifier/Certifier.sol';
 import './DetherAccessControl.sol';
-import './zepellin/SafeMath.sol';
+
+// library
+import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 
 /*
  * This contract aim to manage the generals value fo the contracts

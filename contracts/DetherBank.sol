@@ -1,14 +1,20 @@
-pragma solidity ^0.4.21;
+pragma solidity 0.4.23;
 
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
-import './zepellin/SafeMath.sol';
+
+// interface contract
 import './dth/tokenfoundry/ERC223ReceivingContract.sol';
 import './dth/tokenfoundry/ERC223Basic.sol';
-import 'bytes/BytesLib.sol';
+
+
 import 'ethereum-datetime/contracts/DateTime.sol';
 
+// library
+import 'bytes/BytesLib.sol'; // ethPM
+import 'zeppelin-solidity/contracts/math/SafeMath.sol';
+
 /// @title Contract that will store the Dth from user
-contract DetherBank is ERC223ReceivingContract, Ownable, SafeMath, DateTime {
+contract DetherBank is ERC223ReceivingContract, Ownable, DateTime {
   using BytesLib for bytes;
 
   /*
