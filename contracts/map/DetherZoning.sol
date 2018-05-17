@@ -63,10 +63,10 @@ contract DetherZoning is usingOraclize, Ownable, Countries  {
 
     function createZone(uint x18, uint y18, bytes2 country) public returns (bool zoneAdded){
 
-      require(x18 > 0);
-      require(y18 > 0);
-      require(x18 < 262144); // 68,719,476,736 tiles at zoom level 18, square root
-      require(y18 < 262144);
+      require(x18 >= 0);
+      require(y18 >= 0);
+      require(x18 <= 262144); // 68,719,476,736 tiles at zoom level 18, square root
+      require(y18 <= 262144);
       require( (xIndex[x18] == true &&  yIndex[y18] == true) == false);
       //TODO: check it is inside country
       require(isInsideCountry(x18, y18, country));
