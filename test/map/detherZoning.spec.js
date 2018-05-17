@@ -225,7 +225,7 @@ contract('DetherZoning', () => {
     it("Zone already exists", async () => {
 
       await zoningContract.createZone(143488, 131903, congocode, {from: user1});
-      await expectThrow(zoningContract.createZone(143488, 131903, {from: user1}));
+      expect(await zoningContract.createZone(143488, 131903, {from: user1})).to.equal(false);
     });
 
 

@@ -3,6 +3,7 @@ pragma solidity 0.4.23;
 // contract
 import './DetherSetup.sol';
 import './DetherAccessControl.sol';
+import './map/DetherZoning.sol';
 
 // interface
 import './dth/tokenfoundry/ERC223ReceivingContract.sol';
@@ -78,12 +79,14 @@ contract DetherCore is DetherSetup, ERC223ReceivingContract {
   // bank contract where are stored ETH and DTH
   DetherBank public bank;
 
+  DetherZoning public zoning;
+
   ExchangeRateOracle public priceOracle;
 
   // teller struct
   struct Teller {
-    int32 lat;            // Latitude
-    int32 lng;            // Longitude
+    uint x18;           // x coordinate
+    uint y18;           // y coordinate
     bytes2 countryId;     // countryID (in hexa), ISO ALPHA 2 https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
     bytes16 postalCode;   // postalCode if present, in Hexa https://en.wikipedia.org/wiki/List_of_postal_codes
 
@@ -114,7 +117,7 @@ contract DetherCore is DetherSetup, ERC223ReceivingContract {
   // general mapping of teller
   mapping(address => Teller) teller;
   // mappoing of teller by COUNTRYCODE => POSTALCODE
-  mapping(bytes2 => mapping(bytes16 => address[])) tellerInZone;
+  mapping(bytes2 => mapping(uint => mapping(uint => address[]))) tellerInZone;
   // teller array currently registered
   address[] public tellerIndex; // unordered list of teller register on it
   bool isStarted = false;
@@ -147,15 +150,27 @@ contract DetherCore is DetherSetup, ERC223ReceivingContract {
   constructor() {
    ceoAddress = msg.sender;
   }
-  function initContract (address _dth, address _bank) external onlyCEO {
+  function initContract (address _dth, address _bank, address _zone) external onlyCEO {
     require(!isStarted);
     dth = ERC223Basic(_dth);
     bank = DetherBank(_bank);
+    zoning = DetherZoning(_zone);
     isStarted = true;
   }
 
   function setPriceOracle (address _priceOracle) external onlyCFO {
     priceOracle = ExchangeRateOracle(_priceOracle);
+  }
+
+  function toBytes3(bytes _bytes, uint _start) internal pure returns (bytes3) {
+    require(_bytes.length >= (_start + 3));
+    bytes3 tempBytes3;
+
+    assembly {
+        tempBytes3 := mload(add(add(_bytes, 0x20), _start))
+    }
+
+    return tempBytes3;
   }
 
   /**
@@ -171,9 +186,13 @@ contract DetherCore is DetherSetup, ERC223ReceivingContract {
    * transaction.
    * The _data will wait for
    * [1st byte] 1 (0x31) for shop OR 2 (0x32) for teller
-   * FOR SHOP AND TELLER:
+   * FOR SHOP:
    * 2sd to 5th bytes lat
    * 6th to 9th bytes lng
+   * ...
+   * FOR TELLER:
+   * 2nd to 4th bytes x18
+   * 5th to 7th bytes y18
    * ...
    * Modifier tier1: Check if address is whitelisted with the sms verification
    */
@@ -208,24 +227,32 @@ contract DetherCore is DetherSetup, ERC223ReceivingContract {
       dth.transfer(address(bank), _value);
     } else if (_func == bytes1(0x32)) { // teller registration -- GAS USED 310099
       // require staked greater than licence price
-      require(_value >= licenceTeller[_data.toBytes2(11)]);
+      require(_value >= licenceTeller[_data.toBytes2(7)]);
       // require is not already a teller
       require(!isTeller(_from));
       // require zone is open
-      require(openedCountryTeller[_data.toBytes2(11)]);
+      require(openedCountryTeller[_data.toBytes2(7)]);
 
-      teller[_from].lat = posLat;
-      teller[_from].lng = posLng;
-      teller[_from].countryId = _data.toBytes2(11);
-      teller[_from].postalCode = _data.toBytes16(13);
-      teller[_from].avatarId = int8(_data.toBytes1(29));
-      teller[_from].currencyId = int8(_data.toBytes1(30));
-      teller[_from].messenger = _data.toBytes16(31);
-      teller[_from].rates = int16(_data.toBytes2(47));
-      teller[_from].buyer = _data.toBytes1(49) == bytes1(0x01) ? true : false;
-      teller[_from].buyRates = int16(_data.toBytes2(50));
+      teller[_from].x18 = uint(toBytes3(_data, 1));
+      teller[_from].y18 = uint(toBytes3(_data, 4));
+      teller[_from].countryId = _data.toBytes2(7);
+      teller[_from].avatarId = int8(_data.toBytes1(9));
+      teller[_from].currencyId = int8(_data.toBytes1(10));
+      teller[_from].messenger = _data.toBytes16(11);
+      teller[_from].rates = int16(_data.toBytes2(27));
+      teller[_from].buyer = _data.toBytes1(29) == bytes1(0x01) ? true : false;
+      teller[_from].buyRates = int16(_data.toBytes2(30));
+
       teller[_from].generalIndex = tellerIndex.push(_from) - 1;
-      teller[_from].zoneIndex = tellerInZone[_data.toBytes2(11)][_data.toBytes16(13)].push(_from) - 1;
+      teller[_from].zoneIndex = tellerInZone[teller[_from].countryId][teller[_from].x18][teller[_from].y18].push(_from) - 1;
+
+      // returns true if zone did not yet exist and was created, false if zone already exists
+      zoning.createZone(
+        teller[_from].x18,
+        teller[_from].y18,
+        teller[_from].countryId
+      );
+
       teller[_from].online = true;
       emit RegisterTeller(_from);
       bank.addTokenTeller(_from, _value);
@@ -393,18 +420,25 @@ contract DetherCore is DetherSetup, ERC223ReceivingContract {
   // a teller can delete a sellpoint
   function deleteTeller() external {
     require(isTeller(msg.sender));
-    uint rowToDelete1 = teller[msg.sender].zoneIndex;
-    address keyToMove1 = tellerInZone[teller[msg.sender].countryId][teller[msg.sender].postalCode][tellerInZone[teller[msg.sender].countryId][teller[msg.sender].postalCode].length - 1];
-    tellerInZone[teller[msg.sender].countryId][teller[msg.sender].postalCode][rowToDelete1] = keyToMove1;
-    teller[keyToMove1].zoneIndex = rowToDelete1;
-    tellerInZone[teller[msg.sender].countryId][teller[msg.sender].postalCode].length--;
+    bytes2 countryId = teller[msg.sender].countryId;
+    uint x18 = teller[msg.sender].x18;
+    uint y18 = teller[msg.sender].y18;
 
-    uint rowToDelete2 = teller[msg.sender].generalIndex;
-    address keyToMove2 = tellerIndex[tellerIndex.length - 1];
-    tellerIndex[rowToDelete2] = keyToMove2;
-    teller[keyToMove2].generalIndex = rowToDelete2;
+    uint removeTellerZoneIdx = teller[msg.sender].zoneIndex;
+    uint tellerCountInZone = tellerInZone[countryId][x18][y18].length;
+    address lastTellerZone = tellerInZone[countryId][x18][y18][tellerCountInZone - 1];
+
+    tellerInZone[countryId][x18][y18][removeTellerZoneIdx] = lastTellerZone;
+    teller[lastTellerZone].zoneIndex = removeTellerZoneIdx;
+    tellerInZone[countryId][x18][y18].length--;
+
+    uint removeTellerIdx = teller[msg.sender].generalIndex;
+    address lastTeller = tellerIndex[tellerIndex.length - 1];
+    tellerIndex[removeTellerIdx] = lastTeller;
+    teller[lastTeller].generalIndex = removeTellerIdx;
     tellerIndex.length--;
     delete teller[msg.sender];
+
     bank.withdrawDthTeller(msg.sender);
     bank.refundEth(msg.sender);
     emit DeleteTeller(msg.sender);
@@ -414,18 +448,25 @@ contract DetherCore is DetherSetup, ERC223ReceivingContract {
   // A moderator can delete a sellpoint
   function deleteTellerMods(address _toDelete) isTellerModerator(msg.sender) external {
     require(isTeller(_toDelete));
-    uint rowToDelete1 = teller[_toDelete].zoneIndex;
-    address keyToMove1 = tellerInZone[teller[_toDelete].countryId][teller[_toDelete].postalCode][tellerInZone[teller[_toDelete].countryId][teller[_toDelete].postalCode].length - 1];
-    tellerInZone[teller[_toDelete].countryId][teller[_toDelete].postalCode][rowToDelete1] = keyToMove1;
-    teller[keyToMove1].zoneIndex = rowToDelete1;
-    tellerInZone[teller[_toDelete].countryId][teller[_toDelete].postalCode].length--;
+    bytes2 countryId = teller[_toDelete].countryId;
+    uint x18 = teller[_toDelete].x18;
+    uint y18 = teller[_toDelete].y18;
 
-    uint rowToDelete2 = teller[_toDelete].generalIndex;
-    address keyToMove2 = tellerIndex[tellerIndex.length - 1];
-    tellerIndex[rowToDelete2] = keyToMove2;
-    teller[keyToMove2].generalIndex = rowToDelete2;
+    uint removeTellerZoneIdx = teller[_toDelete].zoneIndex;
+    uint tellerCountInZone = tellerInZone[countryId][x18][y18].length;
+    address lastTellerZone = tellerInZone[countryId][x18][y18][tellerCountInZone - 1];
+
+    tellerInZone[countryId][x18][y18][removeTellerZoneIdx] = lastTellerZone;
+    teller[lastTellerZone].zoneIndex = removeTellerZoneIdx;
+    tellerInZone[countryId][x18][y18].length--;
+
+    uint removeTellerIdx = teller[_toDelete].generalIndex;
+    address lastTeller = tellerIndex[tellerIndex.length - 1];
+    tellerIndex[removeTellerIdx] = lastTeller;
+    teller[lastTeller].generalIndex = removeTellerIdx;
     tellerIndex.length--;
     delete teller[_toDelete];
+
     bank.withdrawDthTeller(_toDelete);
     bank.refundEth(_toDelete);
     emit DeleteTellerModerator(msg.sender, _toDelete);
@@ -480,10 +521,9 @@ contract DetherCore is DetherSetup, ERC223ReceivingContract {
   // get teller
   // return teller info
   function getTeller(address _teller) public view returns (
-    int32 lat,
-    int32 lng,
+    uint x18,
+    uint y18,
     bytes2 countryId,
-    bytes16 postalCode,
     int8 currencyId,
     bytes16 messenger,
     int8 avatarId,
@@ -494,10 +534,9 @@ contract DetherCore is DetherSetup, ERC223ReceivingContract {
     int16 buyRates
     ) {
     Teller storage theTeller = teller[_teller];
-    lat = theTeller.lat;
-    lng = theTeller.lng;
+    x18 = theTeller.x18;
+    y18 = theTeller.y18;
     countryId = theTeller.countryId;
-    postalCode = theTeller.postalCode;
     currencyId = theTeller.currencyId;
     messenger = theTeller.messenger;
     avatarId = theTeller.avatarId;
@@ -568,8 +607,8 @@ contract DetherCore is DetherSetup, ERC223ReceivingContract {
 
   // return an array of address of all teller present on a zone
   // zone is a mapping COUNTRY => POSTALCODE
-  function getZoneTeller(bytes2 _country, bytes16 _postalcode) public view returns (address[]) {
-     return tellerInZone[_country][_postalcode];
+  function getZoneTeller(bytes2 _country, uint x18, uint y18) public view returns (address[]) {
+     return tellerInZone[_country][x18][y18];
   }
 
   // return array of address of all teller

@@ -1,9 +1,8 @@
 {
   "teller1": {
-    "lat": -15.79422,
-    "lng": -47.88216,
-    "countryId": "BR",
-    "postalCode": "70000-000",
+    "x18": 142915,
+    "y18": 131698,
+    "countryId": "CG",
     "avatarId": 4,
     "currencyId": 2,
     "messenger": "mehdi_dether",
@@ -12,10 +11,9 @@
     "buyRates": 10
   },
   "teller2": {
-    "lat": 48.93691,
-    "lng": 2.44612,
-    "countryId": "FR",
-    "postalCode": "75009",
+    "x18": 144703,
+    "y18": 128748,
+    "countryId": "CG",
     "avatarId": 1,
     "currencyId": 2,
     "messenger": "teller2",
@@ -24,10 +22,9 @@
     "buyRates": 10
   },
   "teller3": {
-    "lat": "48.88817",
-    "lng": "2.42741",
-    "countryId": "FR",
-    "postalCode": "75009",
+    "x18": 144703,
+    "y18": 128748,
+    "countryId": "CG",
     "avatarId": "03",
     "currencyId": "2",
     "messenger": "teller3",
@@ -36,10 +33,9 @@
     "buyRates": 10
   },
   "teller4": {
-    "lat": "48.86849",
-    "lng": "2.30473",
-    "countryId": "FR",
-    "postalCode": "75009",
+    "x18": 144703,
+    "y18": 128748,
+    "countryId": "CG",
     "avatarId": "02",
     "currencyId": "2",
     "messenger": "teller1",
@@ -48,10 +44,9 @@
     "buyRates": 10
   },
   "teller5": {
-    "lat": "48.86301",
-    "lng": "2.31993",
-    "countryId": "FR",
-    "postalCode": "75009",
+    "x18": 144703,
+    "y18": 128748,
+    "countryId": "CG",
     "avatarId": "05",
     "currencyId": "2",
     "messenger": "teller2",
@@ -60,10 +55,9 @@
     "buyRates": 10
   },
   "teller6": {
-    "lat": "48.86747",
-    "lng": "2.34092",
-    "countryId": "FR",
-    "postalCode": "75009",
+    "x18": 144703,
+    "y18": 128748,
+    "countryId": "CG",
     "avatarId": "06",
     "currencyId": "2",
     "messenger": "teller3",

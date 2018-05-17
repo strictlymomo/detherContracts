@@ -1,11 +1,12 @@
 /* global artifacts */
-const DetherCore = artifacts.require('./DetherCore.sol');
-const DetherToken = artifacts.require('./dth/DetherToken.sol');
-const SmsCertifier = artifacts.require('./certifier/SmsCertifier.sol');
-const KycCertifier = artifacts.require('./certifier/KycCertifier.sol');
-const DetherBank = artifacts.require('./DetherBank.sol');
-const ExchangeRateOracle = artifacts.require('./ExchangeRateOracle.sol');
-const FakeExchangeRateOracle = artifacts.require('./FakeExchangeRateOracle.sol');
+const DetherCore = artifacts.require('./DetherCore');
+const DetherToken = artifacts.require('./dth/DetherToken');
+const DetherZoning = artifacts.require('./map/DetherZoning');
+const SmsCertifier = artifacts.require('./certifier/SmsCertifier');
+const KycCertifier = artifacts.require('./certifier/KycCertifier');
+const DetherBank = artifacts.require('./DetherBank');
+const ExchangeRateOracle = artifacts.require('./ExchangeRateOracle');
+const FakeExchangeRateOracle = artifacts.require('./FakeExchangeRateOracle');
 
 const CONTRACT_ADDRESSES = {
   kovan: {
@@ -60,4 +61,6 @@ module.exports = async (deployer, network) => {
     default:
       throw new Error(`did not specify how to deploy ExchangeRateOracle on this network (${network})`);
   }
+
+  await deployer.deploy(DetherZoning, { gas: 6000000, gasPrice: 25000000000 });
 };

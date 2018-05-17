@@ -75,6 +75,17 @@ exports.intTo5bytes = (intVal) => {
   return isNegative ? `01${result}` : `00${result}`;
 };
 
+exports.uintTo3bytes = (intVal) => {
+  const hexVal = convertBase.dec2hex(intVal);
+  let result = hexVal;
+
+  for (let i = 0; i + hexVal.length < 6; i += 1) {
+    result = `0${result}`;
+  }
+  
+  return result;
+};
+
 exports.intTo2bytes = (intVal) => {
   const hexVal = convertBase.dec2hex(intVal);
 

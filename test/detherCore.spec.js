@@ -9,6 +9,7 @@ const {
   toNBytes,
   intTo5bytes,
   intTo2bytes,
+  uintTo3bytes,
   intTobytes,
   toAsciiStripZero,
   weiToEth,
@@ -25,14 +26,17 @@ const {
   shop8,
 } = require('./mock.json');
 
+const congo = require('./map/congo12.json');
+
 const DetherCore = artifacts.require('./DetherCore.sol');
 const DetherBank = artifacts.require('./DetherBank.sol');
-const SmsCertifier = artifacts.require('./certifier/SmsCertifier.sol');
-const KycCertifier = artifacts.require('./certifier/KycCertifier.sol');
-const Dth = artifacts.require('./token/DetherToken.sol');
+const DetherZoning = artifacts.require('./map/DetherZoning');
+const SmsCertifier = artifacts.require('./certifier/SmsCertifier');
+const KycCertifier = artifacts.require('./certifier/KycCertifier');
+const Dth = artifacts.require('./token/DetherToken');
 
 // NOTE: use a fake version with a preset exchange rate
-const ExchangeRateOracle = artifacts.require('./token/FakeExchangeRateOracle.sol');
+const ExchangeRateOracle = artifacts.require('./token/FakeExchangeRateOracle');
 
 // fix to solve truffle pblm with overloading
 const web3Abi = require('web3-eth-abi');
@@ -116,21 +120,20 @@ const shopToContractBulk = (rawshop) => {
 };
 
 const tellerToContract = (rawteller) => {
-  const lat = intTo5bytes(parseFloat(rawteller.lat) * 100000);
-  const lng = intTo5bytes(parseFloat(rawteller.lng) * 100000);
+  const x18 = uintTo3bytes(parseInt(rawteller.x18, 10));
+  const y18 = uintTo3bytes(parseInt(rawteller.y18, 10));
 
   const currency = intTobytes(parseInt(rawteller.currencyId, 10));
   const avatar = intTobytes(parseInt(rawteller.avatarId, 10));
   const rates = intTo2bytes(parseFloat(rawteller.rates, 10) * 10);
 
   const countryId = toNBytes(rawteller.countryId, 2);
-  const postalCode = toNBytes(rawteller.postalCode, 16);
   const messenger = toNBytes(rawteller.messenger, 16);
 
   const buyer = rawteller.buyer ? '01' : '00';
   const buyRates = intTo2bytes(parseFloat(rawteller.buyRates) * 10);
 
-  const hexteller = `0x32${lat}${lng}${countryId}${postalCode}${avatar}${currency}${messenger}${rates}${buyer}${buyRates}`;
+  const hexteller = `0x32${x18}${y18}${countryId}${avatar}${currency}${messenger}${rates}${buyer}${buyRates}`;
   return hexteller;
 };
 
@@ -146,18 +149,17 @@ const shopFromContract = rawshop => ({
 });
 
 const tellerFromContract = rawTeller => ({
-  lat: rawTeller[0] / 100000,
-  lng: rawTeller[1] / 100000,
+  x18: rawTeller[0].toNumber(),
+  y18: rawTeller[1].toNumber(),
   countryId: toAsciiStripZero(rawTeller[2]),
-  postalCode: toAsciiStripZero(rawTeller[3]),
-  currencyId: rawTeller[4].toNumber(),
-  messenger: toAsciiStripZero(rawTeller[5]),
-  avatarId: rawTeller[6].toNumber(),
-  rates: rawTeller[7].toNumber() / 10,
-  balance: weiToEth(rawTeller[8]),
-  online: rawTeller[9],
-  buyer: rawTeller[10],
-  buyRates: rawTeller[11].toNumber() / 10,
+  currencyId: rawTeller[3].toNumber(),
+  messenger: toAsciiStripZero(rawTeller[4]),
+  avatarId: rawTeller[5].toNumber(),
+  rates: rawTeller[6].toNumber() / 10,
+  balance: weiToEth(rawTeller[7]),
+  online: rawTeller[8],
+  buyer: rawTeller[9],
+  buyRates: rawTeller[10].toNumber() / 10,
 });
 
 const getAccounts = () => new Promise((resolve, reject) => {
@@ -194,11 +196,12 @@ contract('DetherCore', () => {
     smsCertifier = await SmsCertifier.new({ gas: 6000000, gasPrice: 10000000000, from: owner });
     kycCertifier = await KycCertifier.new({ gas: 6000000, gasPrice: 10000000000, from: owner });
     detherBank = await DetherBank.new({ gas: 6000000, gasPrice: 10000000000, from: owner });
+    detherZoning = await DetherZoning.new({ gas: 6000000, gasPrice: 10000000000, from: owner });
 
     // uses the FakeExchangeRateOracle.sol contract during testing
     priceOracle = await ExchangeRateOracle.new({ gas: 6000000, gasPrice: 25000000000, from: owner });
 
-    await dether.initContract(dthToken.address, detherBank.address);
+    await dether.initContract(dthToken.address, detherBank.address, detherZoning.address);
     await dether.setCSO(moderator);
     await dether.setCMO(cmo);
     await dether.setCFO(cfo);
@@ -210,6 +213,12 @@ contract('DetherCore', () => {
 
     await detherBank.setDth(dthToken.address);
     await detherBank.transferOwnership(dether.address);
+
+    for (const key in congo) {
+      const value = congo[key];
+      await detherZoning.updateCountry(web3.fromAscii('CG'), key, value);
+    }
+    await detherZoning.transferOwnership(dether.address);
 
     await smsCertifier.addDelegate(certifier, 'test', { gas: 4000000, from: owner });
     await smsCertifier.certify(user1address, { gas: 4000000, from: certifier });
@@ -235,8 +244,6 @@ contract('DetherCore', () => {
     await dether.openZoneShop(web3.toHex(shop3.countryId), { from: cmo });
     await dether.openZoneShop(web3.toHex(shop8.countryId), { from: cmo });
     await dether.openZoneTeller(web3.toHex(teller1.countryId), { from: cmo });
-    await dether.openZoneTeller(web3.toHex(teller2.countryId), { from: cmo });
-    await dether.openZoneTeller(web3.toHex(teller3.countryId), { from: cmo });
 
     await dether.setSellDailyLimit(1, web3.toHex(teller1.countryId), 1000, { from: cfo });
     await dether.setSellDailyLimit(2, web3.toHex(teller2.countryId), 5000, { from: cfo });
@@ -618,10 +625,9 @@ contract('DetherCore', () => {
 
       assert.equal(await dether.isTeller(user1address), true, 'shop should be true since its now online');
 
-      assert.equal(valueFromContract.lat, teller1.lat, 'lat did not match');
-      assert.equal(valueFromContract.lng, teller1.lng, 'lng did not match');
+      assert.equal(valueFromContract.x18, teller1.x18, 'x18 did not match');
+      assert.equal(valueFromContract.y18, teller1.y18, 'y18 did not match');
       assert.equal(valueFromContract.countryId, teller1.countryId, 'countryId did not match');
-      assert.equal(valueFromContract.postalCode, teller1.postalCode, 'postalCode did not match');
       assert.equal(valueFromContract.currencyId, teller1.currencyId, 'currency did not match');
       assert.equal(valueFromContract.messenger, teller1.messenger, 'messenger did not match');
       assert.equal(valueFromContract.avatarId, teller1.avatarId, 'avatar did not match');
@@ -630,7 +636,7 @@ contract('DetherCore', () => {
       assert.equal(valueFromContract.buyer, teller1.buyer, 'buyer did not match');
     });
 
-    it('should not be possible to add shop in unopened zone', async () => {
+    it('should not be possible to add teller in unopened zone', async () => {
       await dether.closeZoneTeller(web3.toHex(teller3.countryId), { from: cmo });
 
       const transferMethodTransactionData = web3Abi.encodeFunctionCall(
@@ -654,16 +660,17 @@ contract('DetherCore', () => {
     });
 
     it('should get all teller in a zone', async () => {
-      const zoneBefore = await dether.getZoneTeller(
+      const zone1tellersBefore = await dether.getZoneTeller(
         hexEncode(teller1.countryId),
-        hexEncode(teller1.postalCode),
+        teller1.x18,
+        teller1.y18,
       );
 
-      assert.equal(zoneBefore, '', 'zone should be empty string since it doesnt exist yet');
+      assert.equal(zone1tellersBefore, '', 'zone should be empty string since it doesnt exist yet');
 
       const transferMethodTransactionData = web3Abi.encodeFunctionCall(
         overloadedTransferAbi,
-        [dether.address, 20, tellerToContract(teller3)],
+        [dether.address, 20, tellerToContract(teller1)],
       );
 
       await web3.eth.sendTransaction({
@@ -673,6 +680,14 @@ contract('DetherCore', () => {
         value: 0,
         gas: 5000000,
       });
+
+      const zone1tellersAfter = await dether.getZoneTeller(
+        hexEncode(teller1.countryId),
+        teller1.x18,
+        teller1.y18,
+      );
+
+      assert.deepEqual(zone1tellersAfter, [user1address], `zone should have equaled: [${user1address}]`);
 
       const transferMethodTransactionData2 = web3Abi.encodeFunctionCall(
         overloadedTransferAbi,
@@ -687,18 +702,33 @@ contract('DetherCore', () => {
         gas: 5000000,
       });
 
-      const zoneAfter = await dether.getZoneTeller(
-        hexEncode(teller2.countryId),
-        hexEncode(teller2.postalCode),
+      const transferMethodTransactionData3 = web3Abi.encodeFunctionCall(
+        overloadedTransferAbi,
+        [dether.address, 20, tellerToContract(teller3)],
       );
 
-      assert.deepEqual(zoneAfter, [user1address, user2address], `zone should have equaled: [${user1address}, ${user2address}]`);
+      await web3.eth.sendTransaction({
+        from: user3address,
+        to: dthToken.address,
+        data: transferMethodTransactionData3,
+        value: 0,
+        gas: 5000000,
+      });
+
+      const zone2tellers = await dether.getZoneTeller(
+        hexEncode(teller2.countryId),
+        teller2.x18,
+        teller2.y18,
+      );
+
+      assert.deepEqual(zone2tellers, [user2address, user3address], `zone should have equaled: [${user2address}, ${user3address}]`);
     });
 
     it('should have empty zone after delete', async () => {
       const zoneBefore = await dether.getZoneTeller(
         web3.toHex(teller1.countryId),
-        web3.toHex(teller1.postalCode),
+        teller1.x18,
+        teller1.y18,
       );
 
       assert.equal(zoneBefore, '', 'zone should be empty string since it doesnt exist yet');
@@ -736,13 +766,15 @@ contract('DetherCore', () => {
 
       const zoneAfterTeller1 = await dether.getZoneTeller(
         hexEncode(teller1.countryId),
-        hexEncode(teller1.postalCode),
+        teller1.x18,
+        teller1.y18,
       );
       assert.equal(zoneAfterTeller1, '', 'zone 1 should be empty string');
 
       const zoneAfterTeller2 = await dether.getZoneTeller(
         hexEncode(teller2.countryId),
-        hexEncode(teller2.postalCode),
+        teller2.x18,
+        teller2.y18,
       );
       assert.equal(zoneAfterTeller2, '', 'zone 2 should be empty string');
     });
@@ -750,7 +782,8 @@ contract('DetherCore', () => {
     it('should have token back after delete', async () => {
       const zoneBefore = await dether.getZoneTeller(
         web3.toHex(teller1.countryId),
-        web3.toHex(teller1.postalCode),
+        teller1.x18,
+        teller1.y18,
       );
       assert.equal(zoneBefore, '', 'zone should be empty string');
 
@@ -793,7 +826,7 @@ contract('DetherCore', () => {
       );
     });
 
-    it('should be able to delete a random shop as a moderator', async () => {
+    it('should be able to delete a random teller as a moderator', async () => {
       const transferMethodTransactionData = web3Abi.encodeFunctionCall(
         overloadedTransferAbi,
         [dether.address, 20, tellerToContract(teller1)],
@@ -825,7 +858,7 @@ contract('DetherCore', () => {
       );
     });
 
-    it('should not be be able to delete a random shop if not moderator', async () => {
+    it('should not be be able to delete a random teller if not moderator', async () => {
       assert.equal(
         await dether.isTeller(user1address),
         false,
@@ -867,7 +900,7 @@ contract('DetherCore', () => {
       );
     });
 
-    it('should get his ETH back when delete shop', async () => {
+    it('should get his ETH back when delete teller', async () => {
       const transferMethodTransactionData = web3Abi.encodeFunctionCall(
         overloadedTransferAbi,
         [dether.address, 20, tellerToContract(teller1)],
@@ -960,10 +993,9 @@ contract('DetherCore', () => {
         'assert shop is now online',
       );
 
-      assert.equal(teller.lat, teller1.lat, 'lat did not match');
-      assert.equal(teller.lng, teller1.lng, 'lng did not match');
+      assert.equal(teller.x18, teller1.x18, 'x18 did not match');
+      assert.equal(teller.y18, teller1.y18, 'y18 did not match');
       assert.equal(teller.countryId, teller1.countryId, 'countryId did not match');
-      assert.equal(teller.postalCode, teller1.postalCode, 'postalCode did not match');
       assert.equal(teller.currencyId, 9, 'currency did not match');
       assert.equal(teller.messenger, 'mehdi_dether', 'messenger did not match');
       assert.equal(teller.avatarId, 7, 'avatar did not match');
