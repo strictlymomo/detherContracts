@@ -17,7 +17,7 @@ contract DetherToken is DetailedERC20, MintableToken, ERC223BasicToken {
     /**
       *@dev Constructor that set Detailed of the ERC20 token.
       */
-    function DetherToken()
+    constructor()
         DetailedERC20(NAME, SYMBOL, DECIMALS)
         public
     {}
