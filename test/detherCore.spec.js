@@ -173,7 +173,7 @@ let cmo;
 let certifier;
 let cfo;
 
-contract('Dether Dth', () => {
+contract('DetherCore', () => {
   before(async () => {
     const accs = await getAccounts();
     /* eslint-disable prefer-destructuring */
@@ -242,7 +242,7 @@ contract('Dether Dth', () => {
     await dether.setSellDailyLimit(2, web3.toHex(teller2.countryId), 5000, { from: cfo });
   });
 
-  contract('Add shop --', async () => {
+  describe('< Shop >', async () => {
     it('should be able to bulk add shop from the same address', async () => {
       shop1.address = '0000000000000000000000000000000000000001';
 
@@ -597,7 +597,7 @@ contract('Dether Dth', () => {
    * Teller
    */
 
-  contract('Add Teller --', async () => {
+  describe('< Teller >', async () => {
     it('should parse data and register and be on the map', async () => {
       const transferMethodTransactionData = web3Abi.encodeFunctionCall(
         overloadedTransferAbi,
