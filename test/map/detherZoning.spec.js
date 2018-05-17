@@ -5,7 +5,6 @@
 const {expectThrow} = require('../utils');
 const congo = require('./congo12.json');
 const DetherZoning = artifacts.require('DetherZoning.sol');
-const Countries = artifacts.require('Countries.sol');
 
 const getAccounts = () => new Promise((resolve, reject) => {
   web3.eth.getAccounts((err, acc) => err ? reject(err) : resolve(acc)); // eslint-disable-line
@@ -16,8 +15,8 @@ let user1;
 let user2;
 let user3;
 let congocode;
-let countriesContract;
-let countriesContractAddress;
+let zoningContract;
+let zoningContractAddress;
 let DetherZoningContract;
 
 contract('DetherZoning', () => {
@@ -31,88 +30,86 @@ contract('DetherZoning', () => {
     user3 = accs[3];
 
     congocode = web3.fromAscii("CG"); // 0x4347
-    countriesContract = await Countries.new({ from: owner });
-    countriesContractAddress = countriesContract.address;
   });
 
   beforeEach(async () => {
-    zoningContract = await DetherZoning.new(countriesContract.address);
+    zoningContract = await DetherZoning.new();
   });
 
   it("Is inside country", async () => {
 
     for (var key in congo) {
       var value = congo[key];
-      await countriesContract.updateCountry(congocode, key, value);
+      await zoningContract.updateCountry(congocode, key, value);
     }
 
     assert.equal(
-      await countriesContract.isInsideCountry.call(144704, 128749, congocode),
+      await zoningContract.isInsideCountry.call(144704, 128749, congocode),
       false,
       'should be outside',
     );
 
 
     assert.equal(
-      await countriesContract.isInsideCountry.call(142915, 131698, congocode),
+      await zoningContract.isInsideCountry.call(142915, 131698, congocode),
       true,
       'should be inside',
     );
 
 
     assert.equal(
-      await countriesContract.isInsideCountry.call(144703, 128748, congocode),
+      await zoningContract.isInsideCountry.call(144703, 128748, congocode),
       true,
       'should be inside',
     );
 
 
     assert.equal(
-      await countriesContract.isInsideCountry.call(141568, 130472, congocode),
+      await zoningContract.isInsideCountry.call(141568, 130472, congocode),
       true,
       'should be inside',
     );
 
 
     assert.equal(
-      await countriesContract.isInsideCountry.call(141567, 130475, congocode),
+      await zoningContract.isInsideCountry.call(141567, 130475, congocode),
       false,
       'should be outside',
     );
 
     assert.equal(
-      await countriesContract.isInsideCountry.call(141568, 130475, congocode),
+      await zoningContract.isInsideCountry.call(141568, 130475, congocode),
       true,
       'should be inside',
     );
 
 
     assert.equal(
-      await countriesContract.isInsideCountry.call(143488, 131904, congocode),
+      await zoningContract.isInsideCountry.call(143488, 131904, congocode),
       false,
       'should be outside',
     );
 
     assert.equal(
-      await countriesContract.isInsideCountry.call(143487, 131903, congocode),
+      await zoningContract.isInsideCountry.call(143487, 131903, congocode),
       true,
       'should be inside',
     );
 
     assert.equal(
-      await countriesContract.isInsideCountry.call(143488, 131903, congocode),
+      await zoningContract.isInsideCountry.call(143488, 131903, congocode),
       true,
       'should be inside',
     );
 
     assert.equal(
-      await countriesContract.isInsideCountry.call(143487, 131904, congocode),
+      await zoningContract.isInsideCountry.call(143487, 131904, congocode),
       true,
       'should be inside',
     );
 
     assert.equal(
-      await countriesContract.isInsideCountry.call(142093, 133366, congocode),
+      await zoningContract.isInsideCountry.call(142093, 133366, congocode),
       true,
       'should be inside',
     );
@@ -205,7 +202,7 @@ contract('DetherZoning', () => {
 
     for (var key in congo) {
       var value = congo[key];
-      await countriesContract.updateCountry(congocode, key, value);
+      await zoningContract.updateCountry(congocode, key, value);
     }
 
     const x = 143488;
@@ -256,7 +253,7 @@ contract('DetherZoning', () => {
 
     for (var key in congo) {
       var value = congo[key];
-      await countriesContract.updateCountry(congocode, key, value);
+      await zoningContract.updateCountry(congocode, key, value);
     }
 
     // Distribution of loyalty points
@@ -320,7 +317,7 @@ contract('DetherZoning', () => {
 
     for (var key in congo) {
       var value = congo[key];
-      await countriesContract.updateCountry(congocode, key, value);
+      await zoningContract.updateCountry(congocode, key, value);
     }
 
     await zoningContract.createZone(143488, 131903, congocode, {from: user1});
