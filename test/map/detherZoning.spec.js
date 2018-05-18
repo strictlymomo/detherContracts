@@ -190,64 +190,64 @@ contract('DetherZoning', () => {
     });
   });
 
-  it.skip('Claim zone', async () => {
-    for (var key in congo) {
-      var value = congo[key];
-      await zoningContract.updateCountry(congocode, key, value);
-    }
-
-    // Distribution of loyalty points
-    await zoningContract.simulateLoyaltyPoints(user1, 586, {from: owner});
-    await zoningContract.simulateLoyaltyPoints(user2, 200, {from: owner});
-    await zoningContract.simulateLoyaltyPoints(user3, 700, {from: owner});
-
-    assert.equal(
-      await zoningContract.loyaltyPoints(user1),
-      586,
-      'user1 has loyalty points',
-    );
-
-    assert.equal(
-      await zoningContract.loyaltyPoints(user2),
-      200,
-      'user2 has loyalty points',
-    );
-
-    assert.equal(
-      await zoningContract.loyaltyPoints(user3),
-      700,
-      'user3 has loyalty points',
-    );
-
-    const x = 143488;
-    const y = 131903;
-    zoneId = '143488-131903'
-
-    await zoningContract.createZone(x, y, congocode, {from: user1});
-
-    assert.equal(
-      await zoningContract.getZoneOwner(zoneId),
-      user1,
-      'user1 is the zoneOwner',
-    );
-
-    await expectThrow(zoningContract.claimZone(zoneId,  {from: user2}));
-
-    assert.equal(
-      await zoningContract.claimZone(zoneId,  {from: user3}),
-      true,
-      'user3 should have enough loyalty points',
-    );
-
-    await zoningContract.claimZone(zoneId,  {from: user3});
-
-    assert.equal(
-      await zoningContract.getZoneOwner(zoneId),
-      user3,
-      'user3 should be the zoneOwner',
-    );
-
-    // Non-existence
-    await expectThrow(zoningContract.claimZone('8765-12876',  {from: user2}));
-  });
+  // it('Claim zone', async () => {
+  //   for (var key in congo) {
+  //     var value = congo[key];
+  //     await zoningContract.updateCountry(congocode, key, value);
+  //   }
+  //
+  //   // Distribution of loyalty points
+  //   await zoningContract.simulateLoyaltyPoints(user1, 586, {from: owner});
+  //   await zoningContract.simulateLoyaltyPoints(user2, 200, {from: owner});
+  //   await zoningContract.simulateLoyaltyPoints(user3, 700, {from: owner});
+  //
+  //   assert.equal(
+  //     await zoningContract.loyaltyPoints(user1),
+  //     586,
+  //     'user1 has loyalty points',
+  //   );
+  //
+  //   assert.equal(
+  //     await zoningContract.loyaltyPoints(user2),
+  //     200,
+  //     'user2 has loyalty points',
+  //   );
+  //
+  //   assert.equal(
+  //     await zoningContract.loyaltyPoints(user3),
+  //     700,
+  //     'user3 has loyalty points',
+  //   );
+  //
+  //   const x = 143488;
+  //   const y = 131903;
+  //   zoneId = '143488-131903'
+  //
+  //   await zoningContract.createZone(x, y, congocode, {from: user1});
+  //
+  //   assert.equal(
+  //     await zoningContract.getZoneOwner(zoneId),
+  //     user1,
+  //     'user1 is the zoneOwner',
+  //   );
+  //
+  //   await expectThrow(zoningContract.claimZone(zoneId,  {from: user2}));
+  //
+  //   assert.equal(
+  //     await zoningContract.claimZone(zoneId,  {from: user3}),
+  //     true,
+  //     'user3 should have enough loyalty points',
+  //   );
+  //
+  //   await zoningContract.claimZone(zoneId,  {from: user3});
+  //
+  //   assert.equal(
+  //     await zoningContract.getZoneOwner(zoneId),
+  //     user3,
+  //     'user3 should be the zoneOwner',
+  //   );
+  //
+  //   // Non-existence
+  //   await expectThrow(zoningContract.claimZone('8765-12876',  {from: user2}));
+  // });
 });
