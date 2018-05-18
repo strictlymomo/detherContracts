@@ -246,12 +246,14 @@ contract DetherCore is DetherSetup, ERC223ReceivingContract {
       teller[_from].generalIndex = tellerIndex.push(_from) - 1;
       teller[_from].zoneIndex = tellerInZone[teller[_from].countryId][teller[_from].x18][teller[_from].y18].push(_from) - 1;
 
-      // returns true if zone did not yet exist and was created, false if zone already exists
-      zoning.createZone(
-        teller[_from].x18,
-        teller[_from].y18,
-        teller[_from].countryId
-      );
+      // create zone if it doesn't exist yet
+      if (zoning.doesZoneExist(teller[_from].x18, teller[_from].y18) == false) {
+        zoning.createZone(
+          teller[_from].x18,
+          teller[_from].y18,
+          teller[_from].countryId
+        );
+      }
 
       teller[_from].online = true;
       emit RegisterTeller(_from);
