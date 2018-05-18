@@ -16,106 +16,92 @@ contract DetherZoning is usingOraclize, Ownable, Countries  {
       uint x;
       uint y;
       bytes2 country;
+      bool exists;
     }
 
-    Zone[] public zonesArray;// to be read by client
-    mapping(string => Zone) zonesMapping; // to be read by solidity
+    Zone[] public zoneList;
 
-    // Speed access to zone existence
-    mapping(uint => bool) public xIndex;
-    mapping(uint => bool) public yIndex;
+    //      x18             y18     the zone
+    mapping(uint => mapping(uint => Zone)) internal zoneMapping;
 
-    mapping(address => uint) public loyaltyPoints;
-
-    function updateXindex(uint x) public onlyOwner() {
-      xIndex[x] = true;
-    }
-
-    function updateYindex(uint y) public onlyOwner() {
-      yIndex[y] = true;
-    }
-
-    function getZoneArrayLength() public view returns (uint length){
-      length = zonesArray.length;
-    }
-
-    function zoneIdentifierFromTileCoordinates(uint x, uint y) pure public returns (string) {
-      string memory xString = uint2str(x);
-      string memory yString = uint2str(y);
-      string memory xy = strConcat(xString, "-", yString);
-      return xy;
-    }
-
-    function TileCoordinatesFromZoneIdentifier(string zoneId) pure public returns (
-      uint x,
-      uint y
-      ) {
-
-      strings.slice memory s = zoneId.toSlice();
-      strings.slice memory delim = "-".toSlice();
-      string[] memory parts = new string[](s.count(delim) + 1);
-      for(uint i = 0; i < parts.length; i++) {
-        parts[i] = s.split(delim).toString();
-      }
-      x = parseInt(parts[0]);
-      y = parseInt(parts[1]);
-    }
-
-    function createZone(uint x18, uint y18, bytes2 country) public returns (bool zoneAdded){
+    modifier validX18(uint x18) {
       require(x18 >= 0);
-      require(y18 >= 0);
       require(x18 <= 262144); // 68,719,476,736 tiles at zoom level 18, square root
-      require(y18 <= 262144);
+      _;
+    }
+
+    modifier validY18(uint y18) {
+      require(y18 >= 0);
+      require(y18 <= 262144); // 68,719,476,736 tiles at zoom level 18, square root
+      _;
+    }
+
+    modifier zoneExists(uint x18, uint y18) {
+      require(zoneMapping[x18][y18].exists == true);
+      _;
+    }
+
+    modifier zoneDoesNotExist(uint x18, uint y18) {
+      require(zoneMapping[x18][y18].exists == false);
+      _;
+    }
+
+    function getZoneCount()
+      public
+      view
+      returns (uint zoneCount_)
+    {
+      zoneCount_ = zoneList.length;
+    }
+
+    function doesZoneExist(uint x18, uint y18)
+      public
+      validX18(x18)
+      validY18(y18)
+      view
+      returns (bool zoneExists_)
+    {
+      zoneExists_ = zoneMapping[x18][y18].exists;
+    }
+
+    function createZone(uint x18, uint y18, bytes2 country)
+      public
+      onlyOwner
+      validX18(x18)
+      validY18(y18)
+      zoneDoesNotExist(x18, y18)
+    {
       require(isInsideCountry(x18, y18, country));
 
-      // check if zone already exists
-      if ( (xIndex[x18] == true &&  yIndex[y18] == true) == false) {
-        // zone does not yet exist, create it
-        Zone memory zone = Zone(msg.sender, x18, y18, country);
-        zonesArray.push(zone);
-
-        string memory id = zoneIdentifierFromTileCoordinates(x18, y18);
-        zonesMapping[id] = zone;
-        xIndex[x18] = true;
-        yIndex[y18] = true;
-        zoneAdded = true;
-        return true;
-      }
-
-      // zone already exists
-      return false;
+      Zone memory zone = Zone(msg.sender, x18, y18, country, true);
+      zoneList.push(zone);
+      zoneMapping[x18][y18] = zone;
     }
 
-    function getZoneOwner(string zoneId) public view returns(address zoneOwner){
-      // TODO: check si zone existe
-      Zone storage theZone = zonesMapping[zoneId];
-      zoneOwner = theZone.zoneOwner;
+    function getZoneOwner(uint x18, uint y18)
+      public
+      view
+      validX18(x18)
+      validY18(y18)
+      zoneExists(x18, y18)
+      returns (address zoneOwner_)
+    {
+      zoneOwner_ = zoneMapping[x18][y18].zoneOwner;
     }
 
-    function simulateLoyaltyPoints(address winner, uint score) public onlyOwner() {
-      loyaltyPoints[winner] = score;
-    }
-
-    function zoneExists(string zoneId) public view returns (bool) {
-      uint x;
-      uint y;
-      (x, y) = TileCoordinatesFromZoneIdentifier(zoneId);
-
-      return ((xIndex[x] == true) && (yIndex[y] == true));
-
-    }
-
-    function claimZone(string zoneId) public returns (bool) {
-      require(zoneExists(zoneId) == true);
-
-      Zone memory zone = zonesMapping[zoneId];
-
-      uint ownerLoyaltyPoint = loyaltyPoints[zone.zoneOwner];
-      uint claimerloyaltyPoints = loyaltyPoints[msg.sender];
+    /* function claimZone(uint x18, uint y18, uint loyaltyPointsClaimer, uint loyaltyPointsOwner)
+      public
+      validX18(x18)
+      validY18(y18)
+      zoneExists(x18, y18)
+      onlyOwner
+      returns (bool claimedZone_)
+    {
+      Zone memory zone = zoneMapping[x18][y18];
 
       require(claimerloyaltyPoints > ownerLoyaltyPoint);
-      zonesMapping[zoneId].zoneOwner = msg.sender;
+      zoneMapping[zoneId].zoneOwner = msg.sender;
 
-      return true;
-    }
+      claimedZone_ = true;
+    } */
 }

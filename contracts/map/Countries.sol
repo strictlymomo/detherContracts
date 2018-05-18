@@ -9,45 +9,67 @@ contract Countries is Ownable {
   // Matrix of countries (zoom level 12)
   mapping (bytes2 => mapping(uint => uint[2][])) public countries;
 
-  function updateCountry(bytes2 country, uint xIndex_, uint[2][] value) public onlyOwner() {
-        // TODO: require zoom level check
-        countries[country][xIndex_] = value;
+  function updateCountry(bytes2 country, uint xIndex_, uint[2][] value)
+    public
+    onlyOwner
+  {
+    // TODO: require zoom level check
+    countries[country][xIndex_] = value;
   }
 
-  function getYArraysLength(uint[2][] yArrays) public pure returns (uint){
-    return yArrays.length;
+  function getYArraysLength(uint[2][] yArrays)
+    public
+    pure
+    returns (uint yCount_)
+  {
+    yCount_ = yArrays.length;
   }
 
-  function getCountryColumn(uint xIndex_, bytes2 country) public view returns (uint[2][]) {
-        return countries[country][xIndex_];
+  function getCountryColumn(uint xIndex_, bytes2 country)
+    public
+    view
+    returns (uint[2][] column_)
+  {
+    column_ = countries[country][xIndex_];
   }
 
-  function getParentTile18to12(uint x18, uint y18) public pure returns (uint x12, uint y12) {
-      x12 = x18.div(2**6);
-      y12 = y18.div(2**6);
+  function getParentTile18to12(uint x18, uint y18)
+    public
+    pure
+    returns (uint x12_, uint y12_)
+  {
+    x12_ = x18.div(2**6);
+    y12_ = y18.div(2**6);
   }
 
-  function isInsideCountry(uint x18, uint y18, bytes2 country) public view returns (bool) {
+  function isInsideCountry(uint x18, uint y18, bytes2 country)
+    public
+    view
+    returns (bool insideCountry_)
+  {
     uint x;
     uint y;
-
     (x, y) = getParentTile18to12(x18, y18);
 
     uint[2][] memory yArrays = getCountryColumn(x, country);
 
     if (getYArraysLength(yArrays) ==  0) {
-      return false;
-    }
+      insideCountry_ = false;
+    } else {
+      for (uint i = 0; i < getYArraysLength(yArrays) ; i++){
+        uint[2] memory yArray = yArrays[i];
+        uint yLeft = yArray[0];
+        uint yRight = yArray[1];
 
-    for (uint i = 0; i < getYArraysLength(yArrays) ; i++){
-      uint[2] memory yArray = yArrays[i];
-      uint yLeft = yArray[0];
-      uint yRight = yArray[1];
-
-      if (y >= yLeft && y <= yRight) {
-        return true;
+        if (y >= yLeft && y <= yRight) {
+          insideCountry_ = true;
+          break;
+        }
       }
-     }
-     return false;
+
+      if (insideCountry_ != true) {
+        insideCountry_ = false;
+      }
+    }
   }
 }
