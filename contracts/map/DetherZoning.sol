@@ -1,16 +1,10 @@
 pragma solidity 0.4.23;
 
 // contract
-import 'oraclize-api/usingOraclize.sol'; // EthPM
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 import './Countries.sol';
 
-// library
-import './arachnid/strings.sol';
-
-contract DetherZoning is usingOraclize, Ownable, Countries  {
-    using strings for *;
-
+contract DetherZoning is Ownable, Countries  {
     struct Zone {
       address zoneOwner;
       uint x;
