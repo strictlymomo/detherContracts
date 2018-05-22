@@ -88,7 +88,6 @@ contract DetherCore is DetherSetup, ERC223ReceivingContract {
     uint x18;           // x coordinate
     uint y18;           // y coordinate
     bytes2 countryId;     // countryID (in hexa), ISO ALPHA 2 https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
-    bytes16 postalCode;   // postalCode if present, in Hexa https://en.wikipedia.org/wiki/List_of_postal_codes
 
     int8 currencyId;      // 1 - 100 , cf README
     bytes16 messenger;    // telegrame nickname
