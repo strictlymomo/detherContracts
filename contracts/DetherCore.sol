@@ -425,19 +425,45 @@ contract DetherCore is DetherSetup, ERC223ReceivingContract {
     uint x18 = teller[msg.sender].x18;
     uint y18 = teller[msg.sender].y18;
 
-    uint removeTellerZoneIdx = teller[msg.sender].zoneIndex;
     uint tellerCountInZone = tellerInZone[countryId][x18][y18].length;
-    address lastTellerZone = tellerInZone[countryId][x18][y18][tellerCountInZone - 1];
+    if (tellerCountInZone == 1) {
+      // the teller to remove is the only teller in this zone
+      tellerInZone[countryId][x18][y18].length--;
+    } else {
+      // there are other tellers in this zone besides the one we want to remove
+      uint removeTellerZoneIdx = teller[msg.sender].zoneIndex;
 
-    tellerInZone[countryId][x18][y18][removeTellerZoneIdx] = lastTellerZone;
-    teller[lastTellerZone].zoneIndex = removeTellerZoneIdx;
-    tellerInZone[countryId][x18][y18].length--;
+      if (removeTellerZoneIdx == (tellerCountInZone - 1)) {
+        // the teller to remove is the last in the array, remove it
+        tellerInZone[countryId][x18][y18].length--;
+      } else {
+        // the teller is not the last in the array
+        address lastTellerZone = tellerInZone[countryId][x18][y18][tellerCountInZone - 1];
+        tellerInZone[countryId][x18][y18][removeTellerZoneIdx] = lastTellerZone;
+        teller[lastTellerZone].zoneIndex = removeTellerZoneIdx;
+        tellerInZone[countryId][x18][y18].length--;
+      }
+    }
 
     uint removeTellerIdx = teller[msg.sender].generalIndex;
-    address lastTeller = tellerIndex[tellerIndex.length - 1];
-    tellerIndex[removeTellerIdx] = lastTeller;
-    teller[lastTeller].generalIndex = removeTellerIdx;
-    tellerIndex.length--;
+
+    if (tellerIndex.length == 1) {
+      // the teller to remove is the only teller
+      tellerIndex.length--;
+    } else {
+      // there are more tellers besides the one we are removing
+      if (removeTellerIdx == (tellerIndex.length - 1)) {
+        // the teller to remove is the last in the list
+        tellerIndex.length--;
+      } else {
+        // the teller is not the last in the array
+        address lastTeller = tellerIndex[tellerIndex.length - 1];
+        tellerIndex[removeTellerIdx] = lastTeller;
+        teller[lastTeller].generalIndex = removeTellerIdx;
+        tellerIndex.length--;
+      }
+    }
+
     delete teller[msg.sender];
 
     bank.withdrawDthTeller(msg.sender);
@@ -453,19 +479,45 @@ contract DetherCore is DetherSetup, ERC223ReceivingContract {
     uint x18 = teller[_toDelete].x18;
     uint y18 = teller[_toDelete].y18;
 
-    uint removeTellerZoneIdx = teller[_toDelete].zoneIndex;
     uint tellerCountInZone = tellerInZone[countryId][x18][y18].length;
-    address lastTellerZone = tellerInZone[countryId][x18][y18][tellerCountInZone - 1];
+    if (tellerCountInZone == 1) {
+      // the teller to remove is the only teller in this zone
+      tellerInZone[countryId][x18][y18].length--;
+    } else {
+      // there are other tellers in this zone besides the one we want to remove
+      uint removeTellerZoneIdx = teller[_toDelete].zoneIndex;
 
-    tellerInZone[countryId][x18][y18][removeTellerZoneIdx] = lastTellerZone;
-    teller[lastTellerZone].zoneIndex = removeTellerZoneIdx;
-    tellerInZone[countryId][x18][y18].length--;
+      if (removeTellerZoneIdx == (tellerCountInZone - 1)) {
+        // the teller to remove is the last in the array, remove it
+        tellerInZone[countryId][x18][y18].length--;
+      } else {
+        // the teller is not the last in the array
+        address lastTellerZone = tellerInZone[countryId][x18][y18][tellerCountInZone - 1];
+        tellerInZone[countryId][x18][y18][removeTellerZoneIdx] = lastTellerZone;
+        teller[lastTellerZone].zoneIndex = removeTellerZoneIdx;
+        tellerInZone[countryId][x18][y18].length--;
+      }
+    }
 
     uint removeTellerIdx = teller[_toDelete].generalIndex;
-    address lastTeller = tellerIndex[tellerIndex.length - 1];
-    tellerIndex[removeTellerIdx] = lastTeller;
-    teller[lastTeller].generalIndex = removeTellerIdx;
-    tellerIndex.length--;
+
+    if (tellerIndex.length == 1) {
+      // the teller to remove is the only teller
+      tellerIndex.length--;
+    } else {
+      // there are more tellers besides the one we are removing
+      if (removeTellerIdx == (tellerIndex.length - 1)) {
+        // the teller to remove is the last in the list
+        tellerIndex.length--;
+      } else {
+        // the teller is not the last in the array
+        address lastTeller = tellerIndex[tellerIndex.length - 1];
+        tellerIndex[removeTellerIdx] = lastTeller;
+        teller[lastTeller].generalIndex = removeTellerIdx;
+        tellerIndex.length--;
+      }
+    }
+
     delete teller[_toDelete];
 
     bank.withdrawDthTeller(_toDelete);
