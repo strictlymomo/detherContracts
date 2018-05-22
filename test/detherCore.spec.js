@@ -122,17 +122,13 @@ const shopToContractBulk = (rawshop) => {
 const tellerToContract = (rawteller) => {
   const x18 = uintTo3bytes(parseInt(rawteller.x18, 10));
   const y18 = uintTo3bytes(parseInt(rawteller.y18, 10));
-
+  const countryId = toNBytes(rawteller.countryId, 2);
   const currency = intTobytes(parseInt(rawteller.currencyId, 10));
   const avatar = intTobytes(parseInt(rawteller.avatarId, 10));
-  const rates = intTo2bytes(parseFloat(rawteller.rates, 10) * 10);
-
-  const countryId = toNBytes(rawteller.countryId, 2);
   const messenger = toNBytes(rawteller.messenger, 16);
-
+  const rates = intTo2bytes(parseFloat(rawteller.rates, 10) * 10);
   const buyer = rawteller.buyer ? '01' : '00';
   const buyRates = intTo2bytes(parseFloat(rawteller.buyRates) * 10);
-
   const hexteller = `0x32${x18}${y18}${countryId}${avatar}${currency}${messenger}${rates}${buyer}${buyRates}`;
   return hexteller;
 };
