@@ -2,8 +2,9 @@
 /* global artifacts, contract, web3, assert */
 /* eslint-disable max-len */
 
-const { expectThrow } = require('../utils');
-const congo = require('./congo12.json');
+const path = require('path');
+const fs = require('fs');
+const { expectThrow, addCountryFileToZoning } = require('../utils');
 const DetherZoning = artifacts.require('DetherZoning.sol');
 
 const getAccounts = () => new Promise((resolve, reject) => {
@@ -20,6 +21,7 @@ let congocode;
 let zoningContract;
 
 contract('DetherZoning', () => {
+
   before(async () => {
     const accs = await getAccounts();
     owner = accs[0];
@@ -33,10 +35,7 @@ contract('DetherZoning', () => {
   beforeEach(async () => {
     zoningContract = await DetherZoning.new();
 
-    for (var key in congo) {
-      var value = congo[key];
-      await zoningContract.updateCountry(congocode, key, value);
-    }
+    await addCountryFileToZoning(owner, web3, zoningContract, 'CG', 20);
   });
 
   describe('isInsideCountry(uint x18, uint y18, bytes2 country)', () => {

@@ -14,6 +14,8 @@ const {
   toAsciiStripZero,
   weiToEth,
   ethToWei,
+  flatten,
+  addCountryFileToZoning,
 } = require('./utils');
 
 const {
@@ -26,7 +28,7 @@ const {
   shop8,
 } = require('./mock.json');
 
-const congo = require('./map/congo12.json');
+const country = require('../zones/CG.json');
 
 const DetherCore = artifacts.require('./DetherCore.sol');
 const DetherBank = artifacts.require('./DetherBank.sol');
@@ -210,10 +212,7 @@ contract('DetherCore', () => {
     await detherBank.setDth(dthToken.address);
     await detherBank.transferOwnership(dether.address);
 
-    for (const key in congo) {
-      const value = congo[key];
-      await detherZoning.updateCountry(web3.fromAscii('CG'), key, value);
-    }
+    await addCountryFileToZoning(owner, web3, detherZoning, 'CG', 20);
     await detherZoning.transferOwnership(dether.address);
 
     await smsCertifier.addDelegate(certifier, 'test', { gas: 4000000, from: owner });
