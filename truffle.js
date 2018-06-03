@@ -31,14 +31,14 @@ module.exports = {
       gasPrice: 25000000000,
     },
   },
-  solc: {
-    optimizer: {
-      enabled: true,
-      runs: 200,
-    },
-  },
+  // solc: {
+  //   optimizer: {
+  //     enabled: true,
+  //     runs: 200,
+  //   },
+  // },
   mocha: {
     useColors: true,
-    // reporter: 'eth-gas-reporter', uncomment this line to get gas report!
+    // reporter: 'eth-gas-reporter', // uncomment this line to get gas report!
   },
 };
