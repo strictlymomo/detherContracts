@@ -1,0 +1,475 @@
+{
+  "contractName": "Certifier",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "who",
+          "type": "address"
+        }
+      ],
+      "name": "Confirmed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "who",
+          "type": "address"
+        }
+      ],
+      "name": "Revoked",
+      "type": "event"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_who",
+          "type": "address"
+        }
+      ],
+      "name": "certified",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "//! Certifier contract, taken from ethcore/sms-verification\n//!\n//! Copyright 2016 Gavin Wood, Parity Technologies Ltd.\n//!\n//! Licensed under the Apache License, Version 2.0 (the \"License\");\n//! you may not use this file except in compliance with the License.\n//! You may obtain a copy of the License at\n//!\n//!     http://www.apache.org/licenses/LICENSE-2.0\n//!\n//! Unless required by applicable law or agreed to in writing, software\n//! distributed under the License is distributed on an \"AS IS\" BASIS,\n//! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n//! See the License for the specific language governing permissions and\n//! limitations under the License.\n\npragma solidity 0.4.23;\n\ncontract Certifier {\n\tevent Confirmed(address indexed who);\n\tevent Revoked(address indexed who);\n\tfunction certified(address _who) view public returns (bool);\n}\n",
+  "sourcePath": "/Users/citizenzero/Projects/dether/detherContracts/contracts/certifier/Certifier.sol",
+  "ast": {
+    "absolutePath": "/Users/citizenzero/Projects/dether/detherContracts/contracts/certifier/Certifier.sol",
+    "exportedSymbols": {
+      "Certifier": [
+        3906
+      ]
+    },
+    "id": 3907,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 3890,
+        "literals": [
+          "solidity",
+          "0.4",
+          ".23"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "691:23:7"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 3906,
+        "linearizedBaseContracts": [
+          3906
+        ],
+        "name": "Certifier",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "anonymous": false,
+            "documentation": null,
+            "id": 3894,
+            "name": "Confirmed",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 3893,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3892,
+                  "indexed": true,
+                  "name": "who",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3894,
+                  "src": "754:19:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 3891,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "754:7:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "753:21:7"
+            },
+            "src": "738:37:7"
+          },
+          {
+            "anonymous": false,
+            "documentation": null,
+            "id": 3898,
+            "name": "Revoked",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 3897,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3896,
+                  "indexed": true,
+                  "name": "who",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3898,
+                  "src": "791:19:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 3895,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "791:7:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "790:21:7"
+            },
+            "src": "777:35:7"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 3905,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "certified",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 3901,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3900,
+                  "name": "_who",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3905,
+                  "src": "833:12:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 3899,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "833:7:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "832:14:7"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 3904,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3903,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3905,
+                  "src": "868:4:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 3902,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "868:4:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "867:6:7"
+            },
+            "scope": 3906,
+            "src": "814:60:7",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 3907,
+        "src": "716:160:7"
+      }
+    ],
+    "src": "691:186:7"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/citizenzero/Projects/dether/detherContracts/contracts/certifier/Certifier.sol",
+    "exportedSymbols": {
+      "Certifier": [
+        3906
+      ]
+    },
+    "id": 3907,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 3890,
+        "literals": [
+          "solidity",
+          "0.4",
+          ".23"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "691:23:7"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 3906,
+        "linearizedBaseContracts": [
+          3906
+        ],
+        "name": "Certifier",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "anonymous": false,
+            "documentation": null,
+            "id": 3894,
+            "name": "Confirmed",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 3893,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3892,
+                  "indexed": true,
+                  "name": "who",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3894,
+                  "src": "754:19:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 3891,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "754:7:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "753:21:7"
+            },
+            "src": "738:37:7"
+          },
+          {
+            "anonymous": false,
+            "documentation": null,
+            "id": 3898,
+            "name": "Revoked",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 3897,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3896,
+                  "indexed": true,
+                  "name": "who",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3898,
+                  "src": "791:19:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 3895,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "791:7:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "790:21:7"
+            },
+            "src": "777:35:7"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 3905,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "certified",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 3901,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3900,
+                  "name": "_who",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3905,
+                  "src": "833:12:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 3899,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "833:7:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "832:14:7"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 3904,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3903,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3905,
+                  "src": "868:4:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 3902,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "868:4:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "867:6:7"
+            },
+            "scope": 3906,
+            "src": "814:60:7",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 3907,
+        "src": "716:160:7"
+      }
+    ],
+    "src": "691:186:7"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.23+commit.124ca40d.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "2.0.0",
+  "updatedAt": "2018-06-03T20:34:18.240Z"
+}
