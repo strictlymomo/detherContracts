@@ -55,7 +55,7 @@ contract('Countries', () => {
     }).reverse().join('')
   );
 
-  describe.only('updateCountryBatch(bytes2 country, uint xIndex_, bytes value)', () => {
+  describe('updateCountryBatch(bytes2 country, uint xIndex_, bytes value)', () => {
     const countryCodes = fs
       .readdirSync(path.join(__dirname, '../../zones'))
       .filter(x => !['.', '..'].includes(x))
