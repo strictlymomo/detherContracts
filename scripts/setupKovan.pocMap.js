@@ -16,7 +16,8 @@ const csoDether = "0xC5F8a06ed1CfB17d0366eF03FEDF37568B0ce246";
 const kycDelegateTestnet = '0x32BedF6609f002A591f871009C8e66D84F98d48E';
 const initScript = '0x391edA1b8D31f891d1653B131779751BdeDA24D3';
 
-const congo = require('../tests/map/congo12.json');
+const web3 = require('web3');
+const { addCountryFileToZoning } = require('../test/utils');
 
 const ownerdeploy = "0x6AAb2B0913B70270E840B14c2b23B716C0a43522"
 
@@ -87,10 +88,8 @@ module.exports = async (callback) => {
   //
   // [DetherZoning] add Congo zones + set owner to the be the DetherCore contract
   //
-  for (const key in congo) {
-    const value = congo[key];
-    await detherZoning.updateCountry(web3.fromAscii('CG'), key, value);
-  }
+  await addCountryFileToZoning(owner, web3, detherZoning, 'FR', 20);
+  await addCountryFileToZoning(owner, web3, detherZoning, 'CG', 20);
   await detherZoning.transferOwnership(detherCore.address);
   console.log('owner zoning should be => ', detherCore.address, await detherZoning.owner.call());
 
